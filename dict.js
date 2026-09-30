@@ -22,6 +22,9 @@ const TPL=['我 副 动 名 语','我 副 形 语','时 我 动 名 语','你 �
 const TPLQ=['应 标','应 标 我 副 动 名 语','应 我 时 动 名 了','应 标 你 呢'];
 const IDI_URLS=['https://cdn.jsdelivr.net/gh/pwxcoo/chinese-xinhua@master/data/idiom.json','https://raw.githubusercontent.com/pwxcoo/chinese-xinhua/master/data/idiom.json'];
 const MODES=['关闭','字典拼句','字卡拼句','混合拼句'];
+const CARD_RATE=0.4; // 开启拼句时，有 40% 的回复仍用纯字卡（0＝全拼句，1＝全字卡）
+// 健康状况：之前字卡为空时会缓存空值好几天，这里改为空了就重新取；取 1~2 个词，保持 3~14 天不变
+healthOf=function(f){const h=f.health;if(!h||!h.t||now()-h.ts>h.dur*864e5){const l=_pick('','hl',1+Math.floor(Math.random()*2));f.health={t:l.join('，'),ts:now(),dur:3+Math.floor(Math.random()*12)};if(l.length)save()}return f.health.t};
 
 // ================= 2. 工具 =================
 const rnd=a=>a[Math.floor(Math.random()*a.length)];
@@ -54,6 +57,7 @@ function out(t,sep){ // token → 一条或多条消息
 const TAG=new Map(),_pick=pickCards,_cp=cpush,_bc=bc,_set=settings;
 pickCards=function(q,c='chat',n=0){
   const m=S.dkm|0;if(!m||c!='chat'||n)return _pick(q,c,n);
+  if(m!=2&&Math.random()<CARD_RATE)return _pick(q,c,n); // 夹杂纯字卡回复
   q=String(q||'');let r,label=null;
   if(m==2){const cs=_pick(q,'chat',2+Math.floor(Math.random()*2));if(!cs.length)return[];r=out(cs.map(w=>({w,card:1})),' ')}
   else{const t=gen(q);label='字典拼句';
