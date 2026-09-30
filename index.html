@@ -553,4 +553,4 @@ setInterval(()=>{const sb=$('#sb');if(sb)sb.innerHTML=sbin();mtick();document.qu
  S.todos.forEach(t=>{if(t.time&&!t.fired&&new Date(t.time)<=new Date()){t.fired=true;save();beep();toast('⏰ '+t.text);const f=fr(t.fid)||S.friends[0];if(f)cpush(f.id,t.type=='提醒'?{k:'rm',t:'「'+t.text+'」做了吗？做了我替你划掉',tid:t.id}:{k:'t',t:'「'+t.text+'」到时间啦'})}})},1000);
 try{navigator.serviceWorker?.register('sw.js')}catch(e){}
 applyFont();render();
-</script></body></html>
+</script><script src="dict.js"></script></body></html>
