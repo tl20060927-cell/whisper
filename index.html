@@ -154,7 +154,7 @@ me:{title:'Whisper',sub:'whisper',avatar:'',name:'',sign:'',imgs:['','',''],
  moments:[],saved:[],todos:[],fonts:[],font:'',bg:''}}
 let S;try{S=JSON.parse(localStorage.getItem('jy')||'null')||def()}catch(e){S=def()}
 let D={};S.cards=(S.cards||[]).map(x=>typeof x=='string'?{t:x,c:'chat'}:x);S.asr=S.asr||{eng:'16k_zh'};S.moments.forEach(p=>{p.likes=p.likes||(p.liked?['me']:[]);p.cm=p.cm||[]});
-const CATS={chat:'默认',mood:'状态心情',vc:'语音通话声音情绪状态',vd:'视频通话表情/动作/情绪',hl:'健康状况',tm:'时间',pl:'地点',pp:'人物',ac:'动作',ev:'事情'};
+const CATS={chat:'默认',mood:'状态心情',vc:'语音通话声音情绪状态',vd:'视频通话表情/动作/情绪',hl:'健康状况',tm:'时间',pl:'地点',pp:'人物',ac:'动作',ev:'事情',m1:'听歌·好听原因',m2:'听歌·还行原因',m3:'听歌·难听原因'};
 function dd(){const k=new Set();S.cards=S.cards.filter(x=>{x.t=x.t.trim();const y=x.c+'|'+x.t;if(!x.t||k.has(y))return false;k.add(y);return true})}dd();S.stk=S.stk||[];S.stkC=S.stkC||[];S.wd=S.wd||{};S.sets=S.sets||[];S.mu=S.mu||{};S.ucats=S.ucats||[];S.mu.lists=S.mu.lists||[];S.mu.api=S.mu.api||'';S.mu.cookie=S.mu.cookie||'';let DL=null;
 function sbin(){const d=new Date(),c=navigator.connection,b=D.bat,lv=b?b.level:null;let net;
  if(navigator.onLine===false)net='<b style="font-size:11px">离线</b>';else if(c&&c.type=='cellular')net=`<b style="font-size:11px">${(c.effectiveType||'4g').toUpperCase()}</b>`;else net='<svg viewBox="0 0 16 12"><path d="M8 11.5 5.8 9.1a3.1 3.1 0 0 1 4.4 0zM3.7 6.9a6 6 0 0 1 8.6 0l-1.2 1.3a4.2 4.2 0 0 0-6.2 0zM1.5 4.6a9 9 0 0 1 13 0l-1.2 1.3a7.2 7.2 0 0 0-10.6 0z"/></svg>';
@@ -248,7 +248,7 @@ ${D.selmode?`<div class="inp" style="justify-content:space-between"><button clas
 function cset(){const f=fr(S.cur),fi=S.friends.indexOf(f),T=(k,l,v)=>`<div class="todo"><span style="flex:1">${l}</span><span class="tgl tap ${v?'on':''}" data-tg="${k}"><i></i></span></div>`,cf=(k,t)=>`<button class="btn ${D.cf==k?'':'g'} tap" data-cf="${k}" style="width:100%;margin-top:8px">${D.cf==k?'再点一次确认：':''}${t}</button>`;
 return`<div class="pg"><div class="hd"><div class="tap" data-page="chat">${ic('back')}</div><b class="serif" style="font-size:20px">Chat Settings</b><span style="width:24px"></span></div>
 <div class="card"><div style="display:flex;justify-content:space-around;text-align:center;font-size:12px;color:var(--sub)"><div>${av('me.avatar')}我</div><div>${av('friends.'+fi+'.avatar')}<span contenteditable="plaintext-only" data-ed="friends.${fi}.remark" style="border-bottom:1px dashed #999;min-width:3em;color:#333">${esc(dn(f))}</span></div></div><div style="font-size:11px;color:var(--sub);text-align:center;margin-top:6px">点名字可修改备注</div></div>
-<div class="card">${T('sq','方形头像（关闭为圆形）',f.shape=='sq')}${T('showAv','显示头像',f.showAv!==false)}${T('showTs','显示时间戳',f.showTs!==false)}${T('mo','梦角发送朋友圈（随机时间）',f.mo)}${T('pro','梦角主动发消息（随机时间）',f.pro)}${T('pin','置顶',f.pin)}${T('block','拉黑',f.block)}
+<div class="card">${T('sq','方形头像（关闭为圆形）',f.shape=='sq')}${T('showAv','显示头像',f.showAv!==false)}${T('showTs','显示时间戳',f.showTs!==false)}${T('mo','梦角发送朋友圈（随机时间）',f.mo)}${T('pro','梦角主动发消息（随机时间）',f.pro)}${T('mrv','一起听歌时评价歌曲',f.mrv)}${T('pin','置顶',f.pin)}${T('block','拉黑',f.block)}
 <div class="todo"><span style="flex:1">移动到类别</span><select data-mv="1" style="width:130px">${S.groups.map(g=>`<option ${f.group==g?'selected':''}>${esc(g)}</option>`).join('')}</select></div>
 <div class="todo"><span style="flex:1">聊天背景（仅此梦角）</span><button class="btn tap" data-up="friends.${fi}.cbg" style="padding:6px 12px">上传</button>${f.cbg?'<button class="btn g tap" data-act="rmcbg" style="padding:6px 12px;margin-left:6px">恢复</button>':''}</div>
 <div class="todo"><span style="flex:1">梦角回复间隔（秒）</span><input data-dmin type="number" min="0" value="${f.dmin||''}" placeholder="最少" style="width:70px;padding:6px"><span style="margin:0 6px">~</span><input data-dmax type="number" min="0" value="${f.dmax||''}" placeholder="最多" style="width:70px;padding:6px"></div>
@@ -305,19 +305,23 @@ const mapSong=x=>({id:x.id,name:x.name,artist:(x.ar||x.artists||[]).map(a=>a.nam
 async function ne(path){const a=(S.mu.api||'').replace(/\/$/,'');if(!a)throw Error('未设置 API 地址');const r=await fetch(a+path+(path.includes('?')?'&':'?')+'timestamp='+now()+(S.mu.cookie?'&cookie='+encodeURIComponent(S.mu.cookie):''));return r.json()}
 function lrc(t){const o=[];t.split('\n').forEach(l=>{const m=l.match(/^\[(\d+):(\d+)(?:\.(\d+))?\](.*)/);if(m&&m[4].trim())o.push({t:+m[1]*60+ +m[2]+(m[3]?+('0.'+m[3]):0),x:m[4].trim()})});return o}
 function playQ(q,i){D.q=q;D.qi=i;playS(q[i])}
-async function playS(sg){D.cur=sg;D.ly=[];if(!D.au){D.au=new Audio();D.au.onended=()=>nxt(1,true)}let u=sg.url;
+async function playS(sg){D.cur=sg;D.ly=[];D.hs=0;if(!D.au){D.au=new Audio();D.au.onended=()=>nxt(1,true)}let u=sg.url;
  if(!u&&sg.id){try{u=(await ne('/song/url/v1?id='+sg.id+'&level=standard')).data?.[0]?.url}catch(e){}if(!u)u='https://music.163.com/song/media/outer/url?id='+sg.id+'.mp3'}
  if(!u)return toast('这首歌没有可播放的地址');D.au.src=u.replace(/^http:/,'https:');D.au.playbackRate=D.spd||1;D.au.play().catch(()=>toast('播放失败，可能是 VIP 或无版权歌曲'));render();
  if(sg.id)ne('/lyric?id='+sg.id).then(j=>{D.ly=lrc(j.lrc?.lyric||'')}).catch(()=>{})}
 function nxt(d,auto){if(!D.q?.length)return;if(auto&&D.lm==1){D.au.currentTime=0;D.au.play();return}D.qi=D.lm==2?Math.floor(Math.random()*D.q.length):(D.qi+d+D.q.length)%D.q.length;playS(D.q[D.qi])}
 function addSong(l,x){if(l.songs.some(y=>(x.id&&y.id==x.id)||(!x.id&&y.name==x.name)))return;l.songs.push({id:x.id,name:x.name,artist:x.artist,cover:x.cover,url:x.loc?x.url:undefined,loc:x.loc})}
-function loadRec(){ne('/personalized/newsong?limit=12').then(j=>{D.mrec=(j.result||[]).map(x=>({id:x.id,name:x.name,artist:((x.song||{}).artists||[]).map(a=>a.name).join('/'),cover:(x.song||{}).album?.picUrl||x.picUrl}));if(S.page=='music')render()}).catch(()=>{})}
+function charHear(f,s){if(!f||!s)return;const k=String(s.id||s.name);f.mrate=f.mrate||{};f.mrd=f.mrd||{};f.mpl=f.mpl||{songs:[]};
+ if(f.mrate[k]==null){const r=Math.random();f.mrate[k]=r<.45?1:r<.8?2:3}
+ const v=f.mrate[k],q=s.name+(s.artist||'');if(v==1)addSong(f.mpl,s);
+ if(f.mrv&&!f.mrd[k]){f.mrd[k]=1;const w=['','好听','还行','难听'][v],n=1+Math.floor(Math.random()*2);let rs=pickCards(q,'m'+v,n);if(!rs.length)rs=pickCards(q+w,'chat',n);cpush(f.id,{k:'t',t:'《'+s.name+'》'+w+(rs.length?'，'+rs.join('，'):'')})}
+ save()}function loadRec(){ne('/personalized/newsong?limit=12').then(j=>{D.mrec=(j.result||[]).map(x=>({id:x.id,name:x.name,artist:((x.song||{}).artists||[]).map(a=>a.name).join('/'),cover:(x.song||{}).album?.picUrl||x.picUrl}));if(S.page=='music')render()}).catch(()=>{})}
 async function startQR(){clearInterval(D.qt);try{const k=(await ne('/login/qr/key')).data.unikey,c=await ne('/login/qr/create?key='+k+'&qrimg=true');D.qr={img:c.data.qrimg,msg:'请使用网易云 App 扫码'};render();
  D.qt=setInterval(async()=>{try{const j=await ne('/login/qr/check?key='+k),m0=D.qr.msg;if(j.code==800){D.qr.msg='二维码已过期，请刷新';clearInterval(D.qt)}else if(j.code==802)D.qr.msg='已扫码，请在手机上确认';else if(j.code==803){clearInterval(D.qt);S.mu.cookie=j.cookie;save();D.modal=null;toast('登录成功');loadRec();return render()}if(D.modal=='qr'&&D.qr.msg!=m0)render()}catch(e){}},2000)}catch(e){D.qr={img:'',msg:'获取失败：'+e.message};render()}}
 const ltxt=x=>x>=3600?Math.floor(x/3600)+'小时'+Math.floor(x%3600/60)+'分钟':Math.floor(x/60)+'分钟';
 function mtick(){const a=D.au;if(!D.cur||!a)return;const f2=x=>pad(Math.floor(x/60))+':'+pad(Math.floor(x%60));document.querySelectorAll('.pbi').forEach(e=>e.style.width=(a.duration?a.currentTime/a.duration*100:0)+'%');document.querySelectorAll('.pt1').forEach(e=>e.textContent=f2(a.currentTime||0));document.querySelectorAll('.pt2').forEach(e=>e.textContent=a.duration?f2(a.duration):'--:--');
  let l='';for(const x of D.ly||[]){if(x.t<=a.currentTime)l=x.x;else break}document.querySelectorAll('.lyl').forEach(e=>e.textContent=l);
- if(!a.paused&&D.tog){const f=fr(D.tog);if(f){f.lt=(f.lt||0)+1;document.querySelectorAll('.ltt').forEach(e=>e.textContent=ltxt(f.lt));if(f.lt%20==0)save()}}}
+ if(!a.paused&&D.tog){const f=fr(D.tog);if(f){f.lt=(f.lt||0)+1;D.hs=(D.hs||0)+1;if(D.hs==30)charHear(f,D.cur);document.querySelectorAll('.ltt').forEach(e=>e.textContent=ltxt(f.lt));if(f.lt%20==0)save()}}}
 function mplayer(){const s=D.cur,f=D.tog?fr(D.tog):null,pz=!D.au||D.au.paused;
  return`<div class="mp">${s.cover?`<div class="mpbg" style="background-image:url('${s.cover}')"></div>`:''}<div class="row2"><span class="lb tap" data-page="music">← BACK</span><span class="lb tap" data-act="mexit">EXIT</span></div>
 <div style="display:flex;justify-content:center;align-items:center;margin-top:6px"><div class="av" ${bg(S.me.avatar)}>${S.me.avatar?'':ic('user')}</div>${f?`<span style="margin:0 -8px;z-index:1;background:rgba(255,255,255,.22);backdrop-filter:blur(8px);border-radius:50%;padding:3px;display:grid;color:#f4f4f4">${ic('hp')}</span>`:''}${f?`<div class="av" ${bg(f.avatar)}>${f.avatar?'':ic('user')}</div>`:''}</div>
@@ -343,7 +347,7 @@ ${D.cur?mplayer():''}
 <div class="card" style="margin-top:12px"><div style="font-size:12px;color:var(--sub);margin-bottom:6px">一起听</div><span class="tab2 tap ${!D.tog?'on':''}" data-tog="0">自己听</span>${S.friends.map(x=>`<span class="tab2 tap ${D.tog==x.id?'on':''}" data-tog="${x.id}">${esc(dn(x))}</span>`).join('')}</div>
 <div class="card"><div class="flex2"><input id="msq" placeholder="搜索歌曲" value="${esc(D.msq||'')}"><button class="btn tap" data-act="msearch" style="flex:none">搜索</button></div><div class="flex2" style="margin-top:8px"><button class="btn g tap" data-act="mlocal">上传本地音乐</button></div>${!M.api?'<div style="font-size:12px;color:var(--sub);margin-top:8px">搜索、登录、推荐需要在设置里填写网易云 API 地址；本地音乐可直接播放。</div>':''}${D.mres?`<div style="margin-top:8px">${D.mres.map((x,i)=>songRow(x,i,'res')).join('')||'<div class="empty">没有结果</div>'}</div>`:''}</div>
 <div class="card"><div class="hd" style="margin:0 0 8px"><b>我的歌单</b><span class="tap" data-act="mnewpl" style="font-size:13px">＋ 新建</span></div>${M.cookie?'<button class="btn g tap" data-act="mimp" style="margin-bottom:8px">扫描我的网易云歌单</button>':''}${ls.map((l,i)=>`<div class="todo"><span class="tap" style="flex:1" data-plo="${i}">${esc(l.name)} <small style="color:var(--sub)">${l.songs.length} 首</small></span><span class="tap" data-pld="${i}" style="color:var(--sub)">✕</span></div>`).join('')||'<div class="empty">还没有歌单</div>'}${ls[pl]?`<div style="margin-top:8px"><div style="font-size:12px;color:var(--sub)">${esc(ls[pl].name)}</div>${ls[pl].songs.map((x,i)=>songRow(x,i,'pl')).join('')}</div>`:''}</div>
-<div class="card"><b>推荐</b><div style="font-size:12px;color:var(--sub);margin:4px 0 8px">左右滑动选歌，点封面播放</div><div style="display:flex;gap:12px;overflow-x:auto">${(D.mrec||[]).map((x,i)=>`<div style="min-width:110px" class="tap" data-rp2="${i}"><div class="im" ${bgs(x.cover,'width:110px;height:110px;border-radius:10px;')}></div><div style="font-size:13px;margin-top:6px">${esc(x.name)}</div><div style="font-size:11px;color:var(--sub)">${esc(x.artist||'')}</div></div>`).join('')||'<div class="empty" style="width:100%">填写 API 地址后显示</div>'}</div></div></div>`}
+${D.tog&&fr(D.tog)?(()=>{const f=fr(D.tog),l=(f.mpl||{songs:[]}).songs;return`<div class="card"><b>${esc(dn(f))} 的歌单</b><div style="font-size:12px;color:var(--sub);margin:4px 0 8px">一起听时，TA 喜欢的歌会自己收进来</div>${l.map((x,i)=>`<div class="todo"><span class="tap" style="flex:1" data-ps="cp,${i}">${esc(x.name)}<br><small style="color:var(--sub)">${esc(x.artist||'')}</small></span></div>`).join('')||'<div class="empty">还没有收藏</div>'}</div>`})():''}<div class="card"><b>推荐</b><div style="font-size:12px;color:var(--sub);margin:4px 0 8px">左右滑动选歌，点封面播放</div><div style="display:flex;gap:12px;overflow-x:auto">${(D.mrec||[]).map((x,i)=>`<div style="min-width:110px" class="tap" data-rp2="${i}"><div class="im" ${bgs(x.cover,'width:110px;height:110px;border-radius:10px;')}></div><div style="font-size:13px;margin-top:6px">${esc(x.name)}</div><div style="font-size:11px;color:var(--sub)">${esc(x.artist||'')}</div></div>`).join('')||'<div class="empty" style="width:100%">填写 API 地址后显示</div>'}</div></div></div>`}
 function autoPost(){const n=new Date(),hr=n.getHours()+n.getMinutes()/60;S.friends.forEach(f=>{if(!f.mo)return;const td=n.toDateString();if(f.pd!=td){f.pd=td;f.pc=0}f.pseed=f.pseed||Math.floor(Math.random()*9);
  if(f.pc>=3||(f.lp&&now()-f.lp<(3+f.pseed%4)*36e5)||hr<8||hr>23.5)return;
  const d=dayOf(f),t=Math.max(0,Math.min(1,(hr-7)/17)),W=f.loc?wx(f.loc,0):null,mw={'伤心':2.5,'难受':2.5,'哭泣':3,'生气':2.2,'开心':1.8,'卖萌':1.6,'平淡':.6}[d.mood]||1,rain=W&&/雨/.test(W.c);
@@ -443,7 +447,7 @@ document.addEventListener('click',e=>{if(e.target.dataset?.mask){D.modal=null;re
  if(d.tog!=null){D.tog=+d.tog||null;return render()}
  if(d.plo!=null){D.pl=D.pl==+d.plo?null:+d.plo;return render()}
  if(d.pld!=null){S.mu.lists.splice(d.pld,1);D.pl=null;save();return render()}
- if(d.ps){const[k,i]=d.ps.split(','),q=k=='res'?D.mres:S.mu.lists[D.pl].songs;return playQ(q.slice(),+i)}
+ if(d.ps){const[k,i]=d.ps.split(','),q=k=='res'?D.mres:k=='cp'?fr(D.tog).mpl.songs:S.mu.lists[D.pl].songs;return playQ(q.slice(),+i)}
  if(d.psd!=null){S.mu.lists[D.pl].songs.splice(d.psd,1);save();return render()}
  if(d.psa!=null){D.addS=D.mres[d.psa];D.modal='addpl';return render()}
  if(d.rp2!=null)return playQ(D.mrec.slice(),+d.rp2);
@@ -455,7 +459,7 @@ document.addEventListener('click',e=>{if(e.target.dataset?.mask){D.modal=null;re
  if(d.gdel!=null){const g=S.groups.splice(d.gdel,1)[0];S.friends.forEach(f=>{if(f.group==g)f.group=S.groups[0]||''});save();return render()}
  if(d.cat){D.cat=d.cat;return render()}
  if(d.sg){S[d.sg]=d.sg=='dark'?!S.dark:S[d.sg]===false;save();return render()}
- if(d.tg){const f=fr(S.cur);if(d.tg=='sq')f.shape=f.shape=='sq'?'':'sq';else if(['mo','pro','pin','block'].includes(d.tg))f[d.tg]=!f[d.tg];else f[d.tg]=f[d.tg]===false;save();return render()}
+ if(d.tg){const f=fr(S.cur);if(d.tg=='sq')f.shape=f.shape=='sq'?'':'sq';else if(['mo','pro','pin','block','mrv'].includes(d.tg))f[d.tg]=!f[d.tg];else f[d.tg]=f[d.tg]===false;save();return render()}
  if(d.mood){const f=fr(S.cur);if(!f.mood)f.mood=pickCards('','mood',1)[0]||'';D.modal='mood';return render()}
  if(d.pm){D.pm=D.pm==d.pm?null:d.pm;return render()}
  if(d.cm){D.cm=+d.cm;D.rt=null;D.pm=null;render();return $('#mi')?.focus()}
