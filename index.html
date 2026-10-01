@@ -112,6 +112,7 @@ html[data-theme=dark]{--ink:#ececec;--sub:#9a9aa2;--card:rgba(44,44,50,.62);--li
 [data-theme=dark] .plus{color:var(--ink)}[data-theme=dark] [contenteditable]:focus{background:rgba(255,255,255,.12)}
 [data-theme=dark] .cbox{background:rgba(255,255,255,.06)}[data-theme=dark] .likes{background:rgba(255,255,255,.08)}
 [data-theme=dark] .shotbox{background:#151517;color:#eee}[data-theme=dark] .pmenu{background:#e6e6e6;color:#111}[data-theme=dark] .rx{background:#3a3a40;color:#eee}
+[data-theme=dark] .cover::before{content:'';position:absolute;inset:0;background:#000;opacity:var(--dim,.3);pointer-events:none}
 .dim{position:absolute;inset:0;background:#000;pointer-events:none}
 .mp{position:relative;overflow:hidden;background:rgba(30,30,36,.42)!important;backdrop-filter:blur(26px) saturate(1.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);border:1px solid rgba(255,255,255,.3);box-shadow:0 10px 32px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.45);color:#f4f4f4}
 .mp>*{position:relative;z-index:1}.mp>.mpbg{position:absolute;inset:-24px;z-index:0;background-size:cover;background-position:center;filter:blur(30px) saturate(1.4);opacity:.65}
@@ -319,7 +320,7 @@ function mtick(){const a=D.au;if(!D.cur||!a)return;const f2=x=>pad(Math.floor(x/
  if(!a.paused&&D.tog){const f=fr(D.tog);if(f){f.lt=(f.lt||0)+1;document.querySelectorAll('.ltt').forEach(e=>e.textContent=ltxt(f.lt));if(f.lt%20==0)save()}}}
 function mplayer(){const s=D.cur,f=D.tog?fr(D.tog):null,pz=!D.au||D.au.paused;
  return`<div class="mp">${s.cover?`<div class="mpbg" style="background-image:url('${s.cover}')"></div>`:''}<div class="row2"><span class="lb tap" data-page="music">← BACK</span><span class="lb tap" data-act="mexit">EXIT</span></div>
-<div style="display:flex;justify-content:center;align-items:center;margin-top:6px"><div class="av" ${bg(S.me.avatar)}>${S.me.avatar?'':ic('user')}</div><span style="margin:0 -8px;z-index:1;background:rgba(255,255,255,.22);backdrop-filter:blur(8px);border-radius:50%;padding:3px;display:grid;color:#f4f4f4">${ic('hp')}</span>${f?`<div class="av" ${bg(f.avatar)}>${f.avatar?'':ic('user')}</div>`:''}</div>
+<div style="display:flex;justify-content:center;align-items:center;margin-top:6px"><div class="av" ${bg(S.me.avatar)}>${S.me.avatar?'':ic('user')}</div>${f?`<span style="margin:0 -8px;z-index:1;background:rgba(255,255,255,.22);backdrop-filter:blur(8px);border-radius:50%;padding:3px;display:grid;color:#f4f4f4">${ic('hp')}</span>`:''}${f?`<div class="av" ${bg(f.avatar)}>${f.avatar?'':ic('user')}</div>`:''}</div>
 ${f?`<div style="text-align:center;margin-top:8px;opacity:.6">一起听了 <span class="ltt">${ltxt(f.lt||0)}</span></div><div style="text-align:center;letter-spacing:.5em;margin-top:12px;font-size:14px">TO. ${esc(dn(f))}</div>`:''}
 <div class="ttl">${esc(s.name)}</div><div class="ar">${esc(s.artist||'')}</div><div class="ly lyl"></div>
 <div class="bar" data-seek="1"><i class="pbi" style="width:0"></i></div><div class="row2" style="opacity:.5"><span class="pt1">00:00</span><span class="pt2">--:--</span></div>
@@ -347,7 +348,7 @@ function autoPost(){const n=new Date(),hr=n.getHours()+n.getMinutes()/60;S.frien
  if(f.pc>=3||(f.lp&&now()-f.lp<(3+f.pseed%4)*36e5)||hr<8||hr>23.5)return;
  const d=dayOf(f),t=Math.max(0,Math.min(1,(hr-7)/17)),W=f.loc?wx(f.loc,0):null,mw={'伤心':2.5,'难受':2.5,'哭泣':3,'生气':2.2,'开心':1.8,'卖萌':1.6,'平淡':.6}[d.mood]||1,rain=W&&/雨/.test(W.c);
  let p=.004*mw;if(rain)p*=1.6;if(d.name*t>=10)p*=1.5;if(d.slots.some(s=>s.t&&hr>=s.h&&hr-s.h<.5))p*=1.8;if(Math.random()>p)return;
- const nm=S.me.name||S.me.mname||'你',o=[[mw,'今日心情：'+d.mood+' '+d.face],[rain?2:.4,W?f.loc+' '+W.c+'，'+W.lo+'°~'+W.hi+'°':''],[d.name*t>=10?2:.3,'今天想了'+nm+Math.floor(d.name*t)+'次'],[1,(d.slots.filter(s=>s.t&&s.h<=hr).pop()||{}).t||''],[1,pickCards('','chat',1)[0]||'']].filter(x=>x[1]);
+  const sl=(d.slots.filter(s=>s.t&&s.h<=hr).pop()||{}).t||'',pk=(q,c)=>pickCards(q,c,1)[0]||pickCards(q,'chat',1)[0]||'',o=[[mw,pk(d.mood,'mood')],[rain?2:.4,W?pk(W.c,'chat'):''],[d.name*t>=10?2:.3,pk('想你','chat')],[1,sl?pk(sl,'ev'):''],[1,pk('','chat')]].filter(x=>x[1]);
  if(!o.length)return;let r=Math.random()*o.reduce((a,x)=>a+x[0],0),tx=o[0][1];for(const x of o){r-=x[0];if(r<=0){tx=x[1];break}}
  S.moments.unshift({id:now(),ts:now(),au:f.id,text:tx,imgs:[],likes:[],cm:[]});f.lp=now();f.pc++;save();if(S.page=='moments')render()})}
 const allCats=()=>({...CATS,...Object.fromEntries((S.ucats||[]).map(n=>['u:'+n,n]))});
@@ -398,7 +399,7 @@ function cgap(){return(3+Math.random()*5)*6e4}
 function mgap(){return(1+Math.random()*2)*36e5}
 function zoomImg(s){const r0=s.getBoundingClientRect(),o=document.createElement('div'),g=document.createElement('img');o.className='zoomv';g.src=s.src;o.appendChild(g);document.body.appendChild(o);const fx=()=>{const r=s.isConnected?s.getBoundingClientRect():r0,b=g.getBoundingClientRect();return`translate(${r.left+r.width/2-b.left-b.width/2}px,${r.top+r.height/2-b.top-b.height/2}px) scale(${Math.max(r.width,1)/Math.max(b.width,1)})`};g.style.transition='none';g.style.transform=fx();o.offsetWidth;g.style.transition='';o.classList.add('on');g.style.transform='';o.onclick=e=>{if(e.target==g)return;o.onclick=null;o.classList.remove('on');g.style.transform=fx();setTimeout(()=>o.remove(),260)}}
 document.addEventListener('click',e=>{const z=e.target.closest?.('[data-zoom]');if(!z||D.selmode)return;e.stopPropagation();zoomImg(z)},true);
-function render(){const a=$('#app');a.classList.toggle('hasbar',S.bar!==false);document.documentElement.dataset.theme=S.dark?'dark':'light';document.querySelector('meta[name=theme-color]')?.setAttribute('content',S.dark?'#0b0b0d':'#d3d3d3');a.style.backgroundImage=S.bg?`url('${S.bg}')`:'';
+function render(){const a=$('#app');a.classList.toggle('hasbar',S.bar!==false);document.documentElement.dataset.theme=S.dark?'dark':'light';document.querySelector('meta[name=theme-color]')?.setAttribute('content',S.dark?'#0b0b0d':'#d3d3d3');a.style.backgroundImage=S.bg?`url('${S.bg}')`:'';a.style.setProperty('--dim',(S.dim??30)/100);
  const p={home,moments,settings,chat,cset,sched,music}[S.page];
  const pgE=document.querySelector('.pg'),keep=(D.lp2==S.page&&pgE)?pgE.scrollTop:0,cv=$('#ci')?.value||'',cn=$('#cin')?.value||'',om=$('#msgs'),oTop=om?om.scrollTop:0,oEnd=om?om.scrollHeight-om.scrollTop-om.clientHeight<30:true;
  a.innerHTML=(S.dark?`<div class="dim" style="opacity:${(S.dim??30)/100}"></div>`:'')+(p?p():`<div class="pg"><div class="empty" style="padding-top:200px">这个页面还在构思中</div></div>`)+(['chat','settings','cset'].includes(S.page)?'':nav())+modal()+callUI()+island()+lyr()+(S.bar!==false?`<div id="sb" class="sb">${sbin()}</div>`:'');
@@ -447,7 +448,7 @@ document.addEventListener('click',e=>{if(e.target.dataset?.mask){D.modal=null;re
  if(d.psa!=null){D.addS=D.mres[d.psa];D.modal='addpl';return render()}
  if(d.rp2!=null)return playQ(D.mrec.slice(),+d.rp2);
  if(d.ap!=null){if(D.addS)addSong(S.mu.lists[d.ap],D.addS);D.modal=null;save();toast('已添加');return render()}
- if(d.nl!=null){const pl=D.nel[d.nl];D.modal=null;render();ne('/playlist/track/all?id='+pl.id+'&limit=200').then(j=>{S.mu.lists.push({name:pl.name,songs:(j.songs||[]).map(mapSong)});save();toast('已导入「'+pl.name+'」');render()}).catch(e=>toast('导入失败：'+e.message));return}
+  if(d.nl!=null){const pl=D.nel[d.nl];D.modal=null;render();toast('正在导入「'+pl.name+'」…');const all=[],get=o=>ne('/playlist/track/all?id='+pl.id+'&limit=500&offset='+o).then(j=>{const s=j.songs||[];all.push(...s);if(s.length==500){toast('已读取 '+all.length+' 首…');return get(o+500)}});get(0).then(()=>{S.mu.lists.push({name:pl.name,songs:all.map(mapSong)});save();toast('已导入「'+pl.name+'」'+all.length+' 首');render()}).catch(e=>toast('导入失败：'+e.message));return}
  if(d.seek){const r=t.getBoundingClientRect();if(D.au?.duration)D.au.currentTime=(e.clientX-r.left)/r.width*D.au.duration;return}
  if(d.rm){const[i,a]=d.rm.split(','),f=fr(S.cur),m=f.msgs[i];m.ans=a;const t=S.todos.find(x=>x.id==m.tid);if(a=='做了'&&t)t.done=true;save();render();cpush(f.id,{k:'t',t:a=='做了'?'好，已经替你划掉了':'好，那先留着，晚点再提醒你'});return}
  if(d.cf){const f=fr(S.cur);if(D.cf==d.cf){if(d.cf=='msgs'){f.msgs=[];D.cf=null;save();toast('已清空聊天记录');return render()}S.friends=S.friends.filter(x=>x!=f);S.cur=null;S.page='home';D.cf=null;save();return render()}D.cf=d.cf;return render()}
